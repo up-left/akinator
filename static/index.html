@@ -1,0 +1,57 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+
+  <script src="https://unpkg.com/vue"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+  <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+  <link rel="stylesheet" href="/static/index.css" />
+</head>
+
+<body>
+
+<div id="app">
+  <div v-if="mode == 'start'">
+    <div class="speech">Hi! Think of any food and I'll try to guess it.</div>
+    <button v-on:click="start">Play game</button>
+  </div>
+  <div v-else-if="mode == 'continue'">
+    <div class="speech">Thanks! Do you want to think of any other food?</div>
+    <button v-on:click="start">Play again</button>
+  </div>
+  <div v-else-if="mode == 'question'">
+    <div class="speech">{{question}}</div>
+    <button v-on:click="answer('y')">Yes</button>
+    <button v-on:click="answer('n')">No</button>
+    <button v-on:click="answer('s')">Skip question</button>
+  </div>
+  <div v-else-if="mode == 'guess'">
+    <div class="speech">Is it {{guess}}?</div>
+    <button v-on:click="answer_guess('y')">Yes</button>
+    <button v-on:click="answer_guess('n')">No</button>
+  </div>
+  <div v-else-if="mode == 'send_guess'">
+    <div class="speech">I have no idea what it is. Which food do you think of?</div>
+    <autocomplete v-model="guess" url="/guesses"></autocomplete>
+    <button v-on:click="send_guess">Next</button>
+  </div>
+  <div v-else-if="mode == 'send_question'">
+    <div class="speech">Can you help? Please give me a question which distinguish {{guess}} and {{second_guess}}.</div>
+    <autocomplete v-model="question" url="/questions"></autocomplete>
+    <div class="example">{{guess}}: {{question}} &mdash; Yes.</div>
+    <div class="example">{{second_guess}}: {{question}} &mdash; No.</div>
+    <button v-on:click="send_question">Send</button>
+    <button v-on:click="mode = 'continue'">Skip</button>
+  </div>
+</div>
+
+<script src="/static/index.js"></script>
+
+</body>
+
+</html>
