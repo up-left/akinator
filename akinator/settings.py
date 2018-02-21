@@ -16,9 +16,6 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = 'zrko%$+@hz_g9ic)choi7506&#g*5@p+a1m0v_f%_t@*g(^5be'
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'zrko%$+@hz_g9ic)choi7506&#g*5@p+a1m0v_f%_t@*g(^5be')
@@ -45,6 +42,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -55,21 +53,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'akinator.urls'
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
+TEMPLATES = []
 
 WSGI_APPLICATION = 'akinator.wsgi.application'
 
@@ -77,20 +61,21 @@ WSGI_APPLICATION = 'akinator.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'akinator',
-        'USER': 'postgres',
-        'PASSWORD': '000000',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
-    },
-    'sqlite': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if os.environ.get('DATABASE_URL'):
+    # Heroku: Update database configuration from $DATABASE_URL.
+    import dj_database_url
+    DATABASES = {'default': dj_database_url.config(conn_max_age=500)}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'akinator',
+            'USER': 'postgres',
+            'PASSWORD': '000000',
+            'HOST': '127.0.0.1',
+            'PORT': '5432',
+        },
     }
-}
 
 
 # Password validation
@@ -126,11 +111,16 @@ USE_L10N = True
 USE_TZ = True
 
 
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+X_FRAME_OPTIONS = 'DENY'
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
