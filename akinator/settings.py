@@ -142,4 +142,4 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 WHITENOISE_INDEX_FILE = True
-WHITENOISE_ROOT = 'main'
+WHITENOISE_ROOT = 'static/main/'
