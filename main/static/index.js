@@ -26,8 +26,6 @@ Vue.component('autocomplete', {
     }
 });
 
-var csrf_token = Cookies.get('csrftoken');
-
 var app = new Vue({
     el: '#app',
     data: {
@@ -43,7 +41,7 @@ var app = new Vue({
     methods: {
         start: function() {
             var self = this;
-            axios.post('/play/', {}, {headers: {'X-CSRFToken': csrf_token}})
+            axios.post('/play/', {})
             .then(function(response) {
                 self.uid = response.data.uid;
                 self.next(response);
@@ -51,22 +49,22 @@ var app = new Vue({
         },
         answer: function(choice) {
             var self_next = this.next.bind(this);
-            axios.post('/play/', {uid: this.uid, question_id: this.question_id, choice: choice}, {headers: {'X-CSRFToken': csrf_token}})
+            axios.post('/play/', {uid: this.uid, question_id: this.question_id, choice: choice})
             .then(self_next);
         },
         answer_guess: function(choice) {
             var self_next = this.next.bind(this);
-            axios.post('/play/', {uid: this.uid, guess_id: this.guess_id, choice: choice}, {headers: {'X-CSRFToken': csrf_token}})
+            axios.post('/play/', {uid: this.uid, guess_id: this.guess_id, choice: choice})
             .then(self_next);
         },
         send_guess: function() {
             var self_next = this.next.bind(this);
-            axios.post('/play/', {uid: this.uid, guess: this.guess}, {headers: {'X-CSRFToken': csrf_token}})
+            axios.post('/play/', {uid: this.uid, guess: this.guess})
             .then(self_next);
         },
         send_question: function() {
             var self_next = this.next.bind(this);
-            axios.post('/play/', {uid: this.uid, question: this.question, second_guess_id: this.second_guess_id}, {headers: {'X-CSRFToken': csrf_token}})
+            axios.post('/play/', {uid: this.uid, question: this.question, second_guess_id: this.second_guess_id})
             .then(self_next);
         },
         next: function(response) {
