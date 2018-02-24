@@ -2,6 +2,7 @@
 
 <head>
   <meta charset="utf-8" />
+  <title>Refrigerator (Akinator clone)</title>
 
   <script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.min.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -17,35 +18,47 @@
 <div id="app">
   <div v-if="mode == 'start'">
     <div class="speech">Hi! Think of any food and I'll try to guess it.</div>
-    <button v-on:click="start">Play game</button>
+    <div class="control start">
+      <button v-on:click="start">Play game</button>
+    </div>
   </div>
   <div v-else-if="mode == 'continue'">
     <div class="speech">Thanks! Do you want to think of any other food?</div>
-    <button v-on:click="start">Play again</button>
+    <div class="control start">
+      <button v-on:click="start">Play again</button>
+    </div>
   </div>
   <div v-else-if="mode == 'question'">
     <div class="speech">{{question}}</div>
-    <button v-on:click="answer('y')">Yes</button>
-    <button v-on:click="answer('n')">No</button>
-    <button v-on:click="answer('s')">Skip question</button>
+    <div class="control question">
+      <button v-on:click="answer('y')">Yes</button>
+      <button v-on:click="answer('n')">No</button>
+      <button v-on:click="answer('s')">Skip</button>
+    </div>
   </div>
   <div v-else-if="mode == 'guess'">
     <div class="speech">Is it {{guess}}?</div>
-    <button v-on:click="answer_guess('y')">Yes</button>
-    <button v-on:click="answer_guess('n')">No</button>
+    <div class="control question">
+      <button v-on:click="answer_guess('y')">Yes</button>
+      <button v-on:click="answer_guess('n')">No</button>
+    </div>
   </div>
   <div v-else-if="mode == 'send_guess'">
     <div class="speech">I have no idea what it is. Which food do you think of?</div>
-    <autocomplete v-model="guess" url="/guesses"></autocomplete>
-    <button v-on:click="send_guess">Next</button>
+    <div class="control send-guess">
+      <autocomplete v-model="guess" url="/guesses"></autocomplete>
+      <button v-on:click="send_guess">Next</button>
+    </div>
   </div>
   <div v-else-if="mode == 'send_question'">
     <div class="speech">Can you help? Please give me a question which distinguish {{guess}} and {{second_guess}}.</div>
-    <autocomplete v-model="question" url="/questions"></autocomplete>
-    <div class="example">{{guess}}: {{question}} &mdash; Yes.</div>
-    <div class="example">{{second_guess}}: {{question}} &mdash; No.</div>
-    <button v-on:click="send_question">Send</button>
-    <button v-on:click="mode = 'continue'">Skip</button>
+    <div class="control send-question">
+      <autocomplete v-model="question" url="/questions"></autocomplete>
+      <div class="example">{{guess}}: {{question}} &mdash; Yes.</div>
+      <div class="example">{{second_guess}}: {{question}} &mdash; No.</div>
+      <button v-on:click="send_question">Send</button>
+      <button v-on:click="mode = 'continue'">Skip</button>
+    </div>
   </div>
 </div>
 
