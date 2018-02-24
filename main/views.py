@@ -11,8 +11,7 @@ from .serializers import GuessSerializer, QuestionSerializer
 
 
 MAX_QUESTIONS = 5
-GUESS_THRESHOLD = 1.8
-QUESTION_THRESHOLD = 1.2
+GUESS_THRESHOLD = 1.8  # превышение вероятности, после которого стоит спросить пользователя о догадке
 
 
 @csrf_exempt
@@ -33,6 +32,7 @@ def play(request):
     else:
         game = get_object_or_404(Game, uid=request_data['uid'])
 
+    # Сохранение ответа на вопрос
     if is_question or is_guess:
         if is_question:
             answer = Answer.objects.filter(game=game, question=int(request_data['question_id'])).first()
@@ -61,20 +61,22 @@ def play(request):
             answer.choice = False
             answer.save()
         elif choice == 's':
-            pass  # answer.delete()
+            pass
         else:
             return JsonResponse({'message': 'choice can be only "y", "n" or "s"'}, status=422)
 
+    # Генерация нового вопроса или догадки
     if is_start or is_question or is_guess:
+        question_offer = GameQuestionOffer.objects.filter(game=game).order_by('th').first()
+        questions_exceed = game.answer_set.count() + game.answerguess_set.count() >= MAX_QUESTIONS or not question_offer
+
         best_guesses = GameGuess.objects.filter(game=game, answerguess_id__isnull=True).order_by('-p')[:2]
         best_guess = best_guesses[0].guess if best_guesses else None
         has_guess = best_guesses and (len(best_guesses) == 1 or
                                       best_guesses[0].p >= best_guesses[1].p * GUESS_THRESHOLD)
 
-        question_offer = GameQuestionOffer.objects.filter(game=game).order_by('th').first()
-        questions_exceed = game.answer_set.count() + game.answerguess_set.count() >= MAX_QUESTIONS or not question_offer
-
         if (is_guess and questions_exceed) or not best_guess:
+            # просим прислать догадку, если вопросы кончились, а лучшая на данный момент догадка не подошла
             response_data.update({'send_guess': True})
         elif questions_exceed or has_guess:
             AnswerGuess.objects.create(game=game, guess=best_guess)
@@ -84,6 +86,7 @@ def play(request):
             Answer.objects.create(game=game, question=question)
             response_data.update({'question_id': question.id, 'question': question.name})
 
+    # Сохранение догадки, присланной пользователем
     elif is_user_guess:
         if game.right_guess is not None:
             return JsonResponse({'message': 'this game already has right answer'}, status=422)
@@ -101,6 +104,7 @@ def play(request):
                               'second_guess_id': best_guess_no_filter.guess.id,
                               'second_guess': best_guess_no_filter.guess.name})
 
+    # Сохранение вопроса, присланного пользователем
     elif is_user_question:
         question, _ = Question.objects.get_or_create(name=request_data['question'])
         second_guess = get_object_or_404(Guess, id=int(request_data['second_guess_id']))
